@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MastercraftAI — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'IBM Plex Sans', sans-serif; background: #f0efe9; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.card { background: #fff; border: 1px solid #e0ddd8; border-radius: 12px; padding: 40px; width: 100%; max-width: 420px; }
+.logo { text-align: center; margin-bottom: 28px; }
+.logo h1 { font-family: 'Source Serif 4', serif; font-size: 24px; color: #1a1a1a; }
+.logo p { font-size: 13px; color: #888; margin-top: 4px; }
+.badge { display: inline-block; background: #f0efe9; border: 1px solid #ddd; border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #555; margin-top: 10px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 14px; border: 1px solid #d0ceca; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #1a1a1a; outline: none; background: #fff; }
+.field input:focus, .field select:focus { border-color: #888; }
+.btn { width: 100%; padding: 11px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+.btn:hover { background: #333; }
+.error { background: #fdf0f0; border: 1px solid #f0c0c0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #c0392b; margin-top: 12px; display: none; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider hr { flex: 1; border: none; border-top: 1px solid #e0ddd8; }
+.divider span { font-size: 12px; color: #aaa; }
+.quick-label { font-size: 12px; color: #888; margin-bottom: 8px; display: block; }
+.dropdown-select { width: 100%; padding: 10px 14px; border: 1px solid #d0ceca; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #444; outline: none; background: #fff; cursor: pointer; }
+.dropdown-select:focus { border-color: #888; }
+.quick-btn { width: 100%; padding: 10px; background: #f7f6f3; border: 1px solid #e0ddd8; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #333; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+.quick-btn:hover { background: #eeecea; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <h1>MastercraftAI</h1>
+    <p>Business Intelligence System</p>
+    <div class="badge">AIWS 2208 — Limkokwing University Eswatini</div>
+  </div>
+
+  <div class="field">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter your username" />
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Enter your password" />
+  </div>
+  <button class="btn" onclick="login()">Sign In</button>
+  <div class="error" id="error">Invalid username or password. Please try again.</div>
+
+  <div class="divider"><hr><span>or quick login</span><hr></div>
+
+  <span class="quick-label">Select your role to auto-fill credentials:</span>
+  <select class="dropdown-select" id="quickSelect" onchange="quickFill(this.value)">
+    <option value="">-- Select your role --</option>
+    <option value="admin|admin123">Admin — System Administrator</option>
+    <option value="inventory|inv123">Inventory — Inventory Manager</option>
+    <option value="accounting|acc123">Accounting — Senior Accountant</option>
+    <option value="sales|sales123">Sales — Sales Manager</option>
+    <option value="logistics|log123">Logistics — Logistics Officer</option>
+    <option value="it|it123">IT — IT Administrator</option>
+    <option value="management|mgmt123">Management — Operations Director</option>
+  </select>
+  <button class="quick-btn" onclick="quickLogin()">Sign in with selected role</button>
+</div>
+
+<script>
+function quickFill(val) {
+  if (!val) return;
+  const [u, p] = val.split('|');
+  document.getElementById('username').value = u;
+  document.getElementById('password').value = p;
+}
+
+async function quickLogin() {
+  const val = document.getElementById('quickSelect').value;
+  if (!val) { alert('Please select a role first'); return; }
+  quickFill(val);
+  await login();
+}
+
+async function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const error = document.getElementById('error');
+  error.style.display = 'none';
+  if (!username || !password) { error.style.display = 'block'; error.textContent = 'Please enter username and password.'; return; }
+  try {
+    const res = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+    const data = await res.json();
+    if (data.success) { window.location.href = '/dashboard'; }
+    else { error.style.display = 'block'; error.textContent = 'Invalid username or password. Please try again.'; }
+  } catch(e) { error.style.display = 'block'; error.textContent = 'Connection error. Make sure the server is running.'; }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
